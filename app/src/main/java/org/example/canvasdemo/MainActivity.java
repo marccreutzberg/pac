@@ -1,33 +1,89 @@
 package org.example.canvasdemo;
 
 import android.app.Activity;
+
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.view.View.OnClickListener;
 import android.widget.Button;
+import android.widget.TextView;
 
+import java.util.ArrayList;
 public class MainActivity extends Activity {
-	
+
 	MyView myView;
+	ArrayList<GoldCoin> goldCoins = new ArrayList<GoldCoin>();
+	int point = 0;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_main);
-		Button button = (Button) findViewById(R.id.moveButton);
+
+		Button rightButton = (Button) findViewById(R.id.moveRight);
+		Button leftButton = (Button) findViewById(R.id.moveLeft);
+		Button upButton = (Button) findViewById(R.id.moveUp);
+		Button downButton = (Button) findViewById(R.id.moveDown);
+		Button resetBtn = (Button) findViewById(R.id.resetBtn);
+
 		myView = (MyView) findViewById(R.id.gameView);
 		//listener of our pacman
-		button.setOnClickListener(new OnClickListener() {
-			
+
+		leftButton.setOnClickListener(new View.OnClickListener() {
 			@Override
 			public void onClick(View v) {
-				myView.moveRight(10);
+				point = myView.movePac(1,-20);
+				setPointTextView();
 			}
 		});
-		
-		
+		rightButton.setOnClickListener(new View.OnClickListener() {
+
+			@Override
+			public void onClick(View v) {
+				point = myView.movePac(1,20);
+				setPointTextView();
+			}
+		});
+		upButton.setOnClickListener(new View.OnClickListener() {
+
+			@Override
+			public void onClick(View v) {
+				point = myView.movePac(0,-20);
+				setPointTextView();
+			}
+		});
+		downButton.setOnClickListener(new View.OnClickListener() {
+
+			@Override
+			public void onClick(View v) {
+				point = myView.movePac(0,20);
+				setPointTextView();
+
+			}
+		});
+		for (int i = 0; i < 10; i++ ){
+			GoldCoin g = new GoldCoin();
+			goldCoins.add(g);
+			System.out.print("Adding gold coin nr: " + i);
+		}
+
+		myView.setGoldCoint(goldCoins);
+	}
+
+	public void setPointTextView(){
+		TextView tw = (TextView) findViewById(R.id.pointsTextView);
+		tw.setText("Points: " + point);
+	}
+
+	public void resetGame(View view){
+		point = 0;
+		setPointTextView();
+
+		myView.resetGame();
+
+
+
 	}
 
 	@Override
@@ -48,4 +104,6 @@ public class MainActivity extends Activity {
 		}
 		return super.onOptionsItemSelected(item);
 	}
+
+
 }

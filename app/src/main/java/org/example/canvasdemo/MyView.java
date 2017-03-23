@@ -21,7 +21,6 @@ public class MyView extends View {
 
     public void setGoldCoint(ArrayList<GoldCoin> gold) {
         goldCoins = gold;
-
     }
 
     //The coordinates for our dear pacman: (0,0) is the top-left corner
@@ -94,7 +93,7 @@ public class MyView extends View {
         super.onDraw(canvas);
     }
 
-    //added
+
     public void isOnCoin() {
         for (GoldCoin g : goldCoins) {
             if (!g.isTaken()) {

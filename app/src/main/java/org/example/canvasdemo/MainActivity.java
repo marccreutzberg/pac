@@ -10,100 +10,142 @@ import android.widget.Button;
 import android.widget.TextView;
 
 import java.util.ArrayList;
+import java.util.Timer;
+import java.util.TimerTask;
+
+
 public class MainActivity extends Activity {
+    MyView myView;
+    ArrayList<GoldCoin> goldCoins = new ArrayList<GoldCoin>();
+    int point = 0;
 
-	MyView myView;
-	ArrayList<GoldCoin> goldCoins = new ArrayList<GoldCoin>();
-	int point = 0;
+    enum Move {
+        UP, DOWN, LEFT, RIGHT
+    }
 
-	@Override
-	protected void onCreate(Bundle savedInstanceState) {
-		super.onCreate(savedInstanceState);
-		setContentView(R.layout.activity_main);
+    //FOR AUTO RUN
 
-		Button rightButton = (Button) findViewById(R.id.moveRight);
-		Button leftButton = (Button) findViewById(R.id.moveLeft);
-		Button upButton = (Button) findViewById(R.id.moveUp);
-		Button downButton = (Button) findViewById(R.id.moveDown);
-		Button resetBtn = (Button) findViewById(R.id.resetBtn);
+    private Timer myTimer;
+    private int counter = 0;
+    private Move moves;
+    private Move lastMoove;
 
-		myView = (MyView) findViewById(R.id.gameView);
-		//listener of our pacman
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_main);
 
-		leftButton.setOnClickListener(new View.OnClickListener() {
-			@Override
-			public void onClick(View v) {
-				point = myView.movePac(1,-20);
-				setPointTextView();
-			}
-		});
-		rightButton.setOnClickListener(new View.OnClickListener() {
+        Button rightButton = (Button) findViewById(R.id.moveRight);
+        Button leftButton = (Button) findViewById(R.id.moveLeft);
+        Button upButton = (Button) findViewById(R.id.moveUp);
+        Button downButton = (Button) findViewById(R.id.moveDown);
+        Button resetBtn = (Button) findViewById(R.id.resetBtn);
 
-			@Override
-			public void onClick(View v) {
-				point = myView.movePac(1,20);
-				setPointTextView();
-			}
-		});
-		upButton.setOnClickListener(new View.OnClickListener() {
+        myView = (MyView) findViewById(R.id.gameView);
+        //listener of our pacman
 
-			@Override
-			public void onClick(View v) {
-				point = myView.movePac(0,-20);
-				setPointTextView();
-			}
-		});
-		downButton.setOnClickListener(new View.OnClickListener() {
+        leftButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                moves = Move.LEFT;
+            }
+        });
+        rightButton.setOnClickListener(new View.OnClickListener() {
 
-			@Override
-			public void onClick(View v) {
-				point = myView.movePac(0,20);
-				setPointTextView();
+            @Override
+            public void onClick(View v) {
+                moves = Move.RIGHT;
+            }
+        });
+        upButton.setOnClickListener(new View.OnClickListener() {
 
-			}
-		});
-		for (int i = 0; i < 10; i++ ){
-			GoldCoin g = new GoldCoin();
-			goldCoins.add(g);
-			System.out.print("Adding gold coin nr: " + i);
-		}
+            @Override
+            public void onClick(View v) {
+                moves = Move.UP;
+            }
+        });
+        downButton.setOnClickListener(new View.OnClickListener() {
 
-		myView.setGoldCoint(goldCoins);
-	}
+            @Override
+            public void onClick(View v) {
+                moves = Move.DOWN;
+            }
+        });
 
-	public void setPointTextView(){
-		TextView tw = (TextView) findViewById(R.id.pointsTextView);
-		tw.setText("Points: " + point);
-	}
+        for (int i = 0; i < 10; i++) {
+            GoldCoin g = new GoldCoin();
+            goldCoins.add(g);
+            System.out.print("Adding gold coin nr: " + i);
+        }
 
-	public void resetGame(View view){
-		point = 0;
-		setPointTextView();
+        myTimer = new Timer();
+        myTimer.schedule(new TimerTask() {
+            @Override
+            public void run() {
+                TimerMethod();
+            }
 
-		myView.resetGame();
+        }, 0, 10);
 
+        myView.setGoldCoint(goldCoins);
+    }
 
+    public void setPointTextView() {
+        TextView tw = (TextView) findViewById(R.id.pointsTextView);
+        tw.setText("Points: " + point);
 
-	}
+    }
 
-	@Override
-	public boolean onCreateOptionsMenu(Menu menu) {
-		// Inflate the menu; this adds items to the action bar if it is present.
-		getMenuInflater().inflate(R.menu.main, menu);
-		return true;
-	}
+    public void resetGame(View view) {
+        point = 0;
+        setPointTextView();
+        myView.resetGame();
+        moves = null;
+    }
 
-	@Override
-	public boolean onOptionsItemSelected(MenuItem item) {
-		// Handle action bar item clicks here. The action bar will
-		// automatically handle clicks on the Home/Up button, so long
-		// as you specify a parent activity in AndroidManifest.xml.
-		int id = item.getItemId();
-		if (id == R.id.action_settings) {
-			return true;
-		}
-		return super.onOptionsItemSelected(item);
-	}
+    public void pauseGame(View view) {
+        lastMoove = moves;
+        moves = null;
+     }
 
+    public void continueGame(View view) {
+        if(moves == null) {
+            moves = lastMoove;
+        }
+    }
 
+    //
+    //// FOR AUTO RUN
+    //
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+        myTimer.cancel();
+    }
+
+    private void TimerMethod() {
+        this.runOnUiThread(Timer_Tick);
+    }
+
+    private Runnable Timer_Tick = new Runnable() {
+        public void run() {
+        if (moves != null) {
+            if (moves.equals(moves.LEFT)) {
+                point = myView.movePac(1, -10);
+            } else if (moves.equals(moves.RIGHT)) {
+                point = myView.movePac(1, 10);
+            } else if (moves.equals(moves.UP)) {
+                point = myView.movePac(0, -10);
+            } else if (moves.equals(moves.DOWN)) {
+                point = myView.movePac(0, 10);
+            }
+
+            setPointTextView();
+        }
+        counter++;
+        }
+    };
 }
+
+

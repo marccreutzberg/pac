@@ -16,11 +16,18 @@ public class MyView extends View {
 
     Bitmap pacIcon = BitmapFactory.decodeResource(getResources(), R.drawable.pacman);
     Bitmap coinIcon = BitmapFactory.decodeResource(getResources(), R.drawable.coin_1x);
+    Bitmap enemyIcon = BitmapFactory.decodeResource(getResources(), R.drawable.red);
+
     ArrayList<GoldCoin> goldCoins;
+    ArrayList<Enemy> enemies;
     int points = 0;
 
     public void setGoldCoint(ArrayList<GoldCoin> gold) {
         goldCoins = gold;
+    }
+
+    public void setEnemies(ArrayList<Enemy> enemies) {
+        this.enemies = enemies;
     }
 
     //The coordinates for our dear pacman: (0,0) is the top-left corner
@@ -43,9 +50,43 @@ public class MyView extends View {
         }
 
         isOnCoin();
+        isOnEnemy();
         invalidate(); //redraw everything - this ensures onDraw() is called.
 
         return points;
+    }
+
+    public void moveEnemy(int counter) {
+        int movingEnemyPixels = 5;
+        for (Enemy e : enemies) {
+
+            if (counter % 25 == 0) {
+                e.setWay(randomMiser(1, 4));
+            }
+
+            if (e.getWay() == 1) {
+                //GOING RIGHT
+                if ((e.getX() + enemyIcon.getWidth() + movingEnemyPixels) < w && (e.getX() + enemyIcon.getWidth() + movingEnemyPixels) > enemyIcon.getWidth()) {
+                    e.setX(e.getX() + movingEnemyPixels);
+                }
+
+            } else if (e.getWay() == 2) {
+                if ((e.getX() + enemyIcon.getWidth() - movingEnemyPixels) < w && (e.getX() + enemyIcon.getWidth() - movingEnemyPixels) > enemyIcon.getWidth()) {
+                    e.setX(e.getX() - movingEnemyPixels);
+                }
+            } else if (e.getWay() == 3) {
+                //GOING UP
+
+                if ((e.getY() + enemyIcon.getHeight() + movingEnemyPixels) < h && (e.getY() + enemyIcon.getHeight() + movingEnemyPixels) > enemyIcon.getHeight()) {
+                    e.setY(e.getY() + movingEnemyPixels);
+                }
+
+            } else if (e.getWay() == 4) {
+                if ((e.getY() + enemyIcon.getHeight() - movingEnemyPixels) < h && (e.getY() + enemyIcon.getHeight() - movingEnemyPixels) > enemyIcon.getHeight()) {
+                    e.setY(e.getY() - movingEnemyPixels);
+                }
+            }
+        }
     }
 
     /* The next 3 constructors are needed for the Android view system,
@@ -90,6 +131,16 @@ public class MyView extends View {
                 canvas.drawBitmap(coinIcon, g.getX(), g.getY(), paint);
             }
         }
+
+        for (Enemy e : enemies) {
+            if (!e.isInitialized()) {
+                e.setX(randomMiser(0, w - 100));
+                e.setY(randomMiser(0, h - 100));
+                e.setInitialized(true);
+            }
+            canvas.drawBitmap(enemyIcon, e.getX(), e.getY(), paint);
+        }
+
         super.onDraw(canvas);
     }
 
@@ -105,15 +156,38 @@ public class MyView extends View {
         }
     }
 
+    public void isOnEnemy() {
+        for (Enemy e : enemies) {
+            if (spaceBetween(pacx, pacy, e.getX(), e.getY()) < 100) {
+
+                //GAME OVER HERER !!!
+                //TO DO
+                resetGame();
+            }
+        }
+    }
+
+    /**
+     * Resetting the game
+     * Setteing pac position to start position
+     * Is giving gold coins and enemys new position.
+     */
     public void resetGame() {
         pacx = 50;
         pacy = 400;
         points = 0;
+
         for (GoldCoin g : goldCoins) {
             g.setX(randomMiser(0, w - 100));
             g.setY(randomMiser(0, h - 100));
             g.setInitialized(true);
             g.setTaken(false);
+        }
+
+        for (Enemy e : enemies) {
+            e.setX(randomMiser(0, w - 100));
+            e.setY(randomMiser(0, h - 100));
+            e.setInitialized(true);
         }
 
         invalidate(); //redraw everything - this ensures onDraw() is called.

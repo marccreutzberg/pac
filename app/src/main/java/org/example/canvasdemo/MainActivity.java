@@ -10,6 +10,7 @@ import android.widget.Button;
 import android.widget.TextView;
 
 import java.util.ArrayList;
+import java.util.Random;
 import java.util.Timer;
 import java.util.TimerTask;
 
@@ -17,6 +18,7 @@ import java.util.TimerTask;
 public class MainActivity extends Activity {
     MyView myView;
     ArrayList<GoldCoin> goldCoins = new ArrayList<GoldCoin>();
+    ArrayList<Enemy> enemies = new ArrayList<Enemy>();
     int point = 0;
 
     enum Move {
@@ -78,6 +80,12 @@ public class MainActivity extends Activity {
             System.out.print("Adding gold coin nr: " + i);
         }
 
+        for (int i = 0; i<2; i++){
+            Enemy e = new Enemy();
+            enemies.add(e);
+            System.out.println("Adding enemy nr: " + i);
+        }
+
         myTimer = new Timer();
         myTimer.schedule(new TimerTask() {
             @Override
@@ -88,6 +96,7 @@ public class MainActivity extends Activity {
         }, 0, 10);
 
         myView.setGoldCoint(goldCoins);
+        myView.setEnemies(enemies);
     }
 
     public void setPointTextView() {
@@ -141,11 +150,20 @@ public class MainActivity extends Activity {
                 point = myView.movePac(0, 10);
             }
 
+
+            myView.moveEnemy(counter);
+
+            //enemy running the same way 10 times
             setPointTextView();
         }
         counter++;
         }
     };
+
+    public static int randomMiser(int min, int max) {
+        Random rand = new Random();
+        return rand.nextInt(max - min + 1) + min;
+    }
 }
 
 

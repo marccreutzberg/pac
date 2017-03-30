@@ -140,7 +140,7 @@ public class MainActivity extends FragmentActivity implements GameOverDialog.Gam
                 TimerMethod();
             }
 
-        }, 0, 40);
+        }, 0, 20);
 
         countDownTimer = new Timer();
         countDownTimer.schedule(new TimerTask() {
@@ -208,16 +208,16 @@ public class MainActivity extends FragmentActivity implements GameOverDialog.Gam
         public void run() {
             if (moves != null) {
                 if (moves.equals(moves.LEFT)) {
-                    point = myView.movePac(1, -10, moves.toString());
+                    point = myView.movePac(moves.toString());
                 } else if (moves.equals(moves.RIGHT)) {
-                    point = myView.movePac(1, 10, moves.toString());
+                    point = myView.movePac(moves.toString());
                 } else if (moves.equals(moves.UP)) {
-                    point = myView.movePac(0, -10, moves.toString());
+                    point = myView.movePac(moves.toString());
                 } else if (moves.equals(moves.DOWN)) {
-                    point = myView.movePac(0, 10, moves.toString());
+                    point = myView.movePac(moves.toString());
                 }
 
-                myView.moveEnemy(countDownCounter);
+                myView.moveEnemy();
 
                 //enemy running the same way 10 times
                 setPointTextView();

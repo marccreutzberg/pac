@@ -103,7 +103,7 @@ public class MyView extends View {
     }
 
     public int movePac(String direction) {
-        int movingPixels = h / 150;
+        int movingPixels = ((h + w) / 2) / 150;
         isStarted = true;
 
         if (direction.equals("UP")){
@@ -186,7 +186,7 @@ public class MyView extends View {
     }
 
     public void moveEnemy() {
-        int movingEnemyPixels = h / 300;
+        int movingEnemyPixels = ((h + w) / 2) / 300;
         for (Enemy e : enemies) {
 
             if (moveEnemyCounter % 25 == 0) {

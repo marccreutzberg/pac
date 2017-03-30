@@ -55,6 +55,15 @@ public class MainActivity extends FragmentActivity implements GameOverDialog.Gam
         t.setText("Current level: " + myView.currentLevel.getName());
     }
 
+
+    @Override
+    protected void onSaveInstanceState(Bundle outState) {
+        //ALWAYS CALL THE SUPER METHOD - To be nice!
+        super.onSaveInstanceState(outState);
+        outState.putInt("level", currentLevelIndex);
+        onStop();
+    }
+
     @Override
     public void onLevelsFinishedResetGameClick(DialogFragment dialog) {
         currentLevelIndex = 0;
@@ -67,18 +76,66 @@ public class MainActivity extends FragmentActivity implements GameOverDialog.Gam
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        super.setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
         setContentView(R.layout.activity_main);
-
         levels = generateLevels();
+        myView = (MyView) findViewById(R.id.gameView);
+
+        if (savedInstanceState != null) {
+            currentLevelIndex = savedInstanceState.getInt("level", 0);
+            myView.currentLevel = levels.get(currentLevelIndex);
+            point = 0;
+            for (int i = 0; i < currentLevelIndex; i++) {
+                point = point + levels.get(i).getNumberOfCoins();
+            }
+
+            setPointTextView();
+        } else {
+            myView.currentLevel = levels.get(0);
+        }
+
+        myTimer = new Timer();
+        myTimer.schedule(new TimerTask() {
+            @Override
+            public void run() {
+                TimerMethod();
+            }
+
+        }, 0, 20);
+
+        countDownTimer = new Timer();
+        countDownTimer.schedule(new TimerTask() {
+
+            @Override
+            public void run() {
+                CountDownMethod();
+            }
+        }, 0, 1000);
+
+        System.out.println("--------------------------------------------" + myView.currentLevel.getNumberOfCoins() + "--------------------------------------");
+
+        for (int i = 0; i < myView.currentLevel.getNumberOfCoins(); i++) {
+            GoldCoin g = new GoldCoin();
+            goldCoins.add(g);
+            System.out.print("Adding gold coin nr: " + i);
+        }
+
+        myView.setGoldCoint(goldCoins);
+
+        for (int i = 0; i < 2; i++) {
+            Enemy e = new Enemy();
+            enemies.add(e);
+            System.out.println("Adding enemy nr: " + i);
+        }
+        myView.setEnemies(enemies);
+
+        TextView t = (TextView) findViewById(R.id.currentLevelTextView);
+        t.setText("Current level: " + myView.currentLevel.getName());
+
 
         Button rightButton = (Button) findViewById(R.id.moveRight);
         Button leftButton = (Button) findViewById(R.id.moveLeft);
         Button upButton = (Button) findViewById(R.id.moveUp);
         Button downButton = (Button) findViewById(R.id.moveDown);
-        Button resetBtn = (Button) findViewById(R.id.resetBtn);
-
-        myView = (MyView) findViewById(R.id.gameView);
 
         leftButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -115,44 +172,7 @@ public class MainActivity extends FragmentActivity implements GameOverDialog.Gam
             }
         });
 
-        Level firstLevel = levels.get(0);
 
-        for (int i = 0; i < firstLevel.getNumberOfCoins(); i++) {
-            GoldCoin g = new GoldCoin();
-            goldCoins.add(g);
-            System.out.print("Adding gold coin nr: " + i);
-        }
-
-        for (int i = 0; i < 2; i++) {
-            Enemy e = new Enemy();
-            enemies.add(e);
-            System.out.println("Adding enemy nr: " + i);
-        }
-
-        myTimer = new Timer();
-        myTimer.schedule(new TimerTask() {
-            @Override
-            public void run() {
-                TimerMethod();
-            }
-
-        }, 0, 20);
-
-        countDownTimer = new Timer();
-        countDownTimer.schedule(new TimerTask() {
-
-            @Override
-            public void run() {
-                CountDownMethod();
-            }
-        }, 0, 1000);
-
-        myView.setGoldCoint(goldCoins);
-        myView.currentLevel = levels.get(0);
-        myView.setEnemies(enemies);
-
-        TextView t = (TextView) findViewById(R.id.currentLevelTextView);
-        t.setText("Current level: " + myView.currentLevel.getName());
     }
 
     public void setPointTextView() {
@@ -161,12 +181,20 @@ public class MainActivity extends FragmentActivity implements GameOverDialog.Gam
 
     }
 
-    public void resetCompletedGame(View view) {
+    public void resetLevel(View view) {
         isPaused = false;
         point = 0;
         setPointTextView();
         myView.resetLevel();
         moves = null;
+
+        point = 0;
+        for (int i = 0; i < currentLevelIndex; i++) {
+            point = point + levels.get(i).getNumberOfCoins();
+        }
+
+        myView.points = point;
+        setPointTextView();
     }
 
     public void pauseGame(View view) {
@@ -186,6 +214,7 @@ public class MainActivity extends FragmentActivity implements GameOverDialog.Gam
     protected void onStop() {
         super.onStop();
         myTimer.cancel();
+        countDownTimer.cancel();
     }
 
     private void CountDownMethod() {
@@ -267,6 +296,15 @@ public class MainActivity extends FragmentActivity implements GameOverDialog.Gam
         tw.setText("");
         myView.isStarted = false;
         moves = null;
+
+        point = 0;
+        for (int i = 0; i < currentLevelIndex; i++) {
+            point = point + levels.get(i).getNumberOfCoins();
+        }
+
+        myView.points = point;
+        setPointTextView();
+
         DialogFragment dialog = new GameOverDialog();
         dialog.setCancelable(false);
         dialog.show(getFragmentManager(), "GameOverDialog");
@@ -287,6 +325,8 @@ public class MainActivity extends FragmentActivity implements GameOverDialog.Gam
         tw.setText("");
         myView.isStarted = false;
         moves = null;
+        point = 0;
+        myView.points = 0;
         DialogFragment dialog = new LevelsFinishedDialogFragment();
         dialog.setCancelable(false);
         dialog.show(getFragmentManager(), "LevelsFinishedDialog");

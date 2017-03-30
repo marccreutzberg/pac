@@ -90,7 +90,7 @@ public class MyView extends View {
                 e.setY(randomMiser(0, h - enemyIcon.getHeight()));
 
                 //if enemy is spawing on pac at game start, then enemy will get a new position
-                while (spaceBetween(pacx, pacy, e.getX(), e.getY()) < 100) {
+                while (spaceBetween(pacx, pacy, e.getX(), e.getY()) < enemyIcon.getHeight()) {
                     e.setX(randomMiser(0, w - enemyIcon.getWidth()));
                     e.setY(randomMiser(0, h - enemyIcon.getHeight()));
                 }
@@ -146,7 +146,7 @@ public class MyView extends View {
     public void isOnCoin() {
         for (GoldCoin g : goldCoins) {
             if (!g.isTaken()) {
-                if (spaceBetween(pacx + 50, pacy + 50, g.getX(), g.getY()) < 50) {
+                if (spaceBetween(pacx, pacy, g.getX(), g.getY()) < coinIcon.getHeight()) {
                     g.setTaken(true);
                     takenCounts++;
                     points++;
@@ -175,7 +175,7 @@ public class MyView extends View {
             e.setY(randomMiser(0, h - enemyIcon.getHeight()));
 
             //if enemy is spawing on pac at game start, then enemy will get a new position
-            while (spaceBetween(pacx, pacy, e.getX(), e.getY()) < 100) {
+            while (spaceBetween(pacx, pacy, e.getX(), e.getY()) < enemyIcon.getHeight()) {
                 e.setX(randomMiser(0, w - enemyIcon.getWidth()));
                 e.setY(randomMiser(0, h - enemyIcon.getHeight()));
             }
@@ -264,7 +264,7 @@ public class MyView extends View {
 
     public void isOnEnemy() {
         for (Enemy e : enemies) {
-            if (spaceBetween(pacx + 50, pacy + 50, e.getX(), e.getY()) < 100) {
+            if (spaceBetween(pacx, pacy, e.getX(), e.getY()) < enemyIcon.getHeight()) {
                 gameOver = true;
             }
         }

@@ -1,41 +1,78 @@
 package org.example.canvasdemo;
 
-import android.app.Activity;
-
+import android.app.DialogFragment;
+import android.content.pm.ActivityInfo;
 import android.os.Bundle;
-import android.view.Menu;
-import android.view.MenuItem;
+
+import android.support.v4.app.FragmentActivity;
 import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
 
 import java.util.ArrayList;
-import java.util.Random;
 import java.util.Timer;
 import java.util.TimerTask;
 
 
-public class MainActivity extends Activity {
+public class MainActivity extends FragmentActivity implements GameOverDialog.GameOverDialogListener, VictoryDialogFragment.VictoryDialogFragmentListener, LevelsFinishedDialogFragment.LevelsFinishedDialogFragmentListener {
     MyView myView;
     ArrayList<GoldCoin> goldCoins = new ArrayList<GoldCoin>();
+    ArrayList<Level> levels = new ArrayList<Level>();
     ArrayList<Enemy> enemies = new ArrayList<Enemy>();
     int point = 0;
+    boolean isPaused = false;
+
+    @Override
+    public void onGameOverDialogResetClick(DialogFragment dialog) {
+        myView.resetLevel();
+    }
+
+    @Override
+    public void onVictoryResetLevelClick(DialogFragment dialog) {
+        myView.resetLevel();
+    }
+
+    @Override
+    public void onVictoryNextLevelClick(DialogFragment dialog) {
+        currentLevelIndex++;
+        myView.currentLevel = levels.get(currentLevelIndex);
+        myView.nextLevel();
+        TextView tw = (TextView) findViewById(R.id.timeTextView);
+        tw.setText("");
+        TextView t = (TextView) findViewById(R.id.currentLevelTextView);
+        t.setText("Current level: " + myView.currentLevel.getName());
+    }
+
+    @Override
+    public void onLevelsFinishedResetGameClick(DialogFragment dialog) {
+        currentLevelIndex = 0;
+        myView.currentLevel = levels.get(currentLevelIndex);
+        myView.resetLevel();
+        TextView t = (TextView) findViewById(R.id.currentLevelTextView);
+        t.setText("Current level: " + myView.currentLevel.getName());
+    }
+
 
     enum Move {
         UP, DOWN, LEFT, RIGHT
     }
 
-    //FOR AUTO RUN
-
     private Timer myTimer;
+    private Timer countDownTimer;
+    private int countDownCounter = 0;
     private int counter = 0;
+    private int currentLevelDuration = 0;
+    private int currentLevelIndex = 0;
     private Move moves;
-    private Move lastMoove;
+    private Move lastMove;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        super.setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
         setContentView(R.layout.activity_main);
+
+        levels = generateLevels();
 
         Button rightButton = (Button) findViewById(R.id.moveRight);
         Button leftButton = (Button) findViewById(R.id.moveLeft);
@@ -49,38 +86,48 @@ public class MainActivity extends Activity {
         leftButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                moves = Move.LEFT;
+                if (!isPaused) {
+                    moves = Move.LEFT;
+                }
             }
         });
         rightButton.setOnClickListener(new View.OnClickListener() {
 
             @Override
             public void onClick(View v) {
-                moves = Move.RIGHT;
+                if (!isPaused) {
+                    moves = Move.RIGHT;
+                }
             }
         });
         upButton.setOnClickListener(new View.OnClickListener() {
-
             @Override
             public void onClick(View v) {
-                moves = Move.UP;
+                if (!isPaused) {
+                    moves = Move.UP;
+                }
             }
         });
         downButton.setOnClickListener(new View.OnClickListener() {
 
             @Override
             public void onClick(View v) {
-                moves = Move.DOWN;
+                if (!isPaused) {
+                    moves = Move.DOWN;
+                }
+
             }
         });
 
-        for (int i = 0; i < 10; i++) {
+        Level firstLevel = levels.get(0);
+
+        for (int i = 0; i < firstLevel.getNumberOfCoins(); i++) {
             GoldCoin g = new GoldCoin();
             goldCoins.add(g);
             System.out.print("Adding gold coin nr: " + i);
         }
 
-        for (int i = 0; i<2; i++){
+        for (int i = 0; i < 2; i++) {
             Enemy e = new Enemy();
             enemies.add(e);
             System.out.println("Adding enemy nr: " + i);
@@ -93,10 +140,23 @@ public class MainActivity extends Activity {
                 TimerMethod();
             }
 
-        }, 0, 10);
+        }, 0, 40);
+
+        countDownTimer = new Timer();
+        countDownTimer.schedule(new TimerTask() {
+
+            @Override
+            public void run() {
+                CountDownMethod();
+            }
+        }, 0, 1000);
 
         myView.setGoldCoint(goldCoins);
+        myView.currentLevel = levels.get(0);
         myView.setEnemies(enemies);
+
+        TextView t = (TextView) findViewById(R.id.currentLevelTextView);
+        t.setText("Current level: " + myView.currentLevel.getName());
     }
 
     public void setPointTextView() {
@@ -105,21 +165,24 @@ public class MainActivity extends Activity {
 
     }
 
-    public void resetGame(View view) {
+    public void resetCompletedGame(View view) {
+        isPaused = false;
         point = 0;
         setPointTextView();
-        myView.resetGame();
+        myView.resetLevel();
         moves = null;
     }
 
     public void pauseGame(View view) {
-        lastMoove = moves;
+        isPaused = true;
+        lastMove = moves;
         moves = null;
-     }
+    }
 
     public void continueGame(View view) {
-        if(moves == null) {
-            moves = lastMoove;
+        if (moves == null) {
+            isPaused = false;
+            moves = lastMove;
         }
     }
 
@@ -133,36 +196,111 @@ public class MainActivity extends Activity {
         myTimer.cancel();
     }
 
+    private void CountDownMethod() {
+        this.runOnUiThread(CountDown_Tick);
+    }
+
     private void TimerMethod() {
         this.runOnUiThread(Timer_Tick);
     }
 
     private Runnable Timer_Tick = new Runnable() {
         public void run() {
-        if (moves != null) {
-            if (moves.equals(moves.LEFT)) {
-                point = myView.movePac(1, -10);
-            } else if (moves.equals(moves.RIGHT)) {
-                point = myView.movePac(1, 10);
-            } else if (moves.equals(moves.UP)) {
-                point = myView.movePac(0, -10);
-            } else if (moves.equals(moves.DOWN)) {
-                point = myView.movePac(0, 10);
+            if (moves != null) {
+                if (moves.equals(moves.LEFT)) {
+                    point = myView.movePac(1, -10, moves.toString());
+                } else if (moves.equals(moves.RIGHT)) {
+                    point = myView.movePac(1, 10, moves.toString());
+                } else if (moves.equals(moves.UP)) {
+                    point = myView.movePac(0, -10, moves.toString());
+                } else if (moves.equals(moves.DOWN)) {
+                    point = myView.movePac(0, 10, moves.toString());
+                }
+
+                myView.moveEnemy(countDownCounter);
+
+                //enemy running the same way 10 times
+                setPointTextView();
+            }
+
+            if (myView.gameOver && moves != null) {
+                gameOver();
+            }
+
+            if ((currentLevelDuration - myView.counter) > 0 && myView.takenCounts == myView.goldCoins.size() && moves != null) {
+                if (currentLevelIndex < levels.size() - 1) {
+                    victory();
+                } else {
+                    resetCompletedGame();
+                }
             }
 
 
-            myView.moveEnemy(counter);
-
-            //enemy running the same way 10 times
-            setPointTextView();
-        }
-        counter++;
         }
     };
 
-    public static int randomMiser(int min, int max) {
-        Random rand = new Random();
-        return rand.nextInt(max - min + 1) + min;
+    private Runnable CountDown_Tick = new Runnable() {
+        public void run() {
+            if (myView.isStarted && !isPaused) {
+                countDownCounter = myView.updateTime();
+                currentLevelDuration = myView.currentLevel.getDuration();
+
+                if ((currentLevelDuration - myView.counter) <= 0) {
+                    gameOver();
+                }
+
+                TextView tw = (TextView) findViewById(R.id.timeTextView);
+                tw.setText("Time remaining: " + (currentLevelDuration - countDownCounter));
+            }
+        }
+
+    };
+
+    private ArrayList<Level> generateLevels() {
+        ArrayList<Level> levels = new ArrayList<Level>();
+        Level level1 = new Level(20, 5, "Level 1");
+        Level level2 = new Level(15, 8, "Level 2");
+        Level level3 = new Level(15, 10, "Level 3");
+        Level level4 = new Level(10, 10, "Level 4");
+        Level level5 = new Level(10, 15, "Level 5");
+
+        levels.add(level1);
+        levels.add(level2);
+        levels.add(level3);
+        levels.add(level4);
+        levels.add(level5);
+
+        return levels;
+    }
+
+    public void gameOver() {
+        TextView tw = (TextView) findViewById(R.id.timeTextView);
+        tw.setText("");
+        myView.isStarted = false;
+        moves = null;
+        DialogFragment dialog = new GameOverDialog();
+        dialog.setCancelable(false);
+        dialog.show(getFragmentManager(), "GameOverDialog");
+    }
+
+    public void victory() {
+        TextView tw = (TextView) findViewById(R.id.timeTextView);
+        tw.setText("");
+        myView.isStarted = false;
+        moves = null;
+        DialogFragment dialog = new VictoryDialogFragment();
+        dialog.setCancelable(false);
+        dialog.show(getFragmentManager(), "VictoryDialog");
+    }
+
+    public void resetCompletedGame() {
+        TextView tw = (TextView) findViewById(R.id.timeTextView);
+        tw.setText("");
+        myView.isStarted = false;
+        moves = null;
+        DialogFragment dialog = new LevelsFinishedDialogFragment();
+        dialog.setCancelable(false);
+        dialog.show(getFragmentManager(), "LevelsFinishedDialog");
     }
 }
 

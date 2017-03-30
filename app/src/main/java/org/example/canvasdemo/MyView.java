@@ -14,44 +14,51 @@ import java.util.Random;
 
 public class MyView extends View {
 
-    //Setting Bitmaps for the 3 Icons. Pac Icon, Coin Icon and Enemy Icon
     Bitmap pacIcon = BitmapFactory.decodeResource(getResources(), R.drawable.pacman);
     Bitmap coinIcon = BitmapFactory.decodeResource(getResources(), R.drawable.coin_1x);
     Bitmap enemyIcon = BitmapFactory.decodeResource(getResources(), R.drawable.red);
 
-    //Setting 2 list for goldCoins and Enemys
     ArrayList<GoldCoin> goldCoins;
     ArrayList<Enemy> enemies;
-
-    //Createing variable for points
     int points = 0;
+    int counter = 0;
+    int takenCounts = 0;
+    boolean isStarted = false;
+    boolean gameOver = false;
+    Level currentLevel;
 
-    //The coordinates for our pacman: (0,0) is the top-left corner
+    public void setGoldCoint(ArrayList<GoldCoin> gold) {
+        goldCoins = gold;
+    }
+
+    public void setEnemies(ArrayList<Enemy> enemies) {
+        this.enemies = enemies;
+    }
+
+    //The coordinates for our dear pacman: (0,0) is the top-left corner
     int pacx = 50;
     int pacy = 400;
-
-    //Height and Width of the canvas
-    int h, w;
+    int h, w; //used for storing our height and width
 
     /* The next 3 constructors are needed for the Android view system,
     when we have a custom view.
      */
     public MyView(Context context) {
         super(context);
+
     }
 
     public MyView(Context context, AttributeSet attrs) {
         super(context, attrs);
     }
 
+
     public MyView(Context context, AttributeSet attrs, int defStyleAttr) {
         super(context, attrs, defStyleAttr);
     }
 
-    /**
-     * Drawing the view - painting pac, all goldCoins, all Enemys and setteing H and W of the canvas
-     * @param canvas
-     */
+    //In the onDraw we put all our code that should be
+    //drawn whenever we update the screen.
     @Override
     protected void onDraw(Canvas canvas) {
         //Here we get the height and weight
@@ -79,36 +86,48 @@ public class MyView extends View {
         for (Enemy e : enemies) {
             if (!e.isInitialized()) {
                 e.setX(randomMiser(0, w - enemyIcon.getWidth()));
-                e.setY(randomMiser(0, h - enemyIcon.getHeight()));
-                
+                e.setY(randomMiser(0, h - h - enemyIcon.getHeight()));
+
                 //if enemy is spawing on pac at game start, then enemy will get a new position
                 while (spaceBetween(pacx, pacy, e.getX(), e.getY()) < 100){
                     e.setX(randomMiser(0, w - enemyIcon.getWidth()));
                     e.setY(randomMiser(0, h - enemyIcon.getHeight()));
                 }
 
+
+                e.setInitialized(true);
             }
             canvas.drawBitmap(enemyIcon, e.getX(), e.getY(), paint);
         }
 
+
         super.onDraw(canvas);
     }
 
-    /**
-     * Moving pac
-     * @param way can be 1,2,3,4 descriptions the way the enemy should move
-     * @param movingPixels
-     * @return
-     */
-    public int movePac(int way, int movingPixels) {
+    public int movePac(int way, int movingPixels, String direction) {
+        isStarted = true;
         if (way == 0) {
             //up og ned
+            if (direction == "UP") {
+                pacIcon = BitmapFactory.decodeResource(getResources(), R.drawable.pacman_up);
+            }
+            if (direction == "DOWN") {
+                pacIcon = BitmapFactory.decodeResource(getResources(), R.drawable.pacman_down);
+            }
             if ((pacy + pacIcon.getHeight() + movingPixels) < h && (pacy + pacIcon.getHeight() + movingPixels) > pacIcon.getHeight()) {
                 pacy = pacy + movingPixels;
+
             }
         }
         //FREM OG TILBAGE
         else if (way == 1) {
+            if (direction == "RIGHT") {
+                pacIcon = BitmapFactory.decodeResource(getResources(), R.drawable.pacman);
+            }
+            if (direction == "LEFT") {
+                pacIcon = BitmapFactory.decodeResource(getResources(), R.drawable.pacman_left);
+            }
+
             if ((pacx + pacIcon.getWidth() + movingPixels) < w && (pacx + pacIcon.getWidth() + movingPixels) > pacIcon.getWidth()) {
                 pacx = pacx + movingPixels;
             }
@@ -121,10 +140,37 @@ public class MyView extends View {
         return points;
     }
 
-    /**
-     * Moving all enemys 5 px.
-     * @param counter
-     */
+
+    public void isOnCoin() {
+        for (GoldCoin g : goldCoins) {
+            if (!g.isTaken()) {
+                if (spaceBetween(pacx, pacy, g.getX(), g.getY()) < 50) {
+                    g.setTaken(true);
+                    takenCounts++;
+                    points++;
+                }
+            }
+        }
+    }
+
+    public void resetLevel() {
+        pacIcon = BitmapFactory.decodeResource(getResources(), R.drawable.pacman);
+        pacx = 50;
+        pacy = 400;
+        counter = 0;
+        takenCounts = 0;
+        isStarted = false;
+        gameOver = false;
+        for (GoldCoin g : goldCoins) {
+            g.setX(randomMiser(0, w - 100));
+            g.setY(randomMiser(0, h - 100));
+            g.setInitialized(true);
+            g.setTaken(false);
+        }
+
+        invalidate(); //redraw everything - this ensures onDraw() is called.
+    }
+
     public void moveEnemy(int counter) {
         int movingEnemyPixels = 5;
         for (Enemy e : enemies) {
@@ -158,72 +204,6 @@ public class MyView extends View {
         }
     }
 
-
-    /**
-     * Cheching if pac is on a conin and counting points
-     */
-    public void isOnCoin() {
-        for (GoldCoin g : goldCoins) {
-            if (!g.isTaken()) {
-                if (spaceBetween(pacx, pacy, g.getX(), g.getY()) < 100) {
-                    g.setTaken(true);
-                    points++;
-                }
-            }
-        }
-    }
-
-    /**
-     * Cheching if pac is on a enemy then resetting the game
-     */
-    public void isOnEnemy() {
-        for (Enemy e : enemies) {
-            if (spaceBetween(pacx, pacy, e.getX(), e.getY()) < 100) {
-
-                //GAME OVER HERER !!!
-                //TO DO
-                resetGame();
-            }
-        }
-    }
-
-    /**
-     * Resetting the game
-     * Setteing pac position to start position
-     * Is giving gold coins and enemys new position.
-     */
-    public void resetGame() {
-        pacx = 50;
-        pacy = 400;
-        points = 0;
-
-        for (GoldCoin g : goldCoins) {
-            g.setX(randomMiser(0, w - 100));
-            g.setY(randomMiser(0, h - 100));
-            g.setInitialized(true);
-            g.setTaken(false);
-        }
-
-        for (Enemy e : enemies) {
-            e.setX(randomMiser(0, w - enemyIcon.getWidth()));
-            e.setY(randomMiser(0, h - enemyIcon.getHeight()));
-
-
-            //
-            // // HEERRR
-            //
-            //if enemy is spawing on pac at game start, then enemy will get a new position
-            while (spaceBetween(pacx, pacy, e.getX(), e.getY()) < 100){
-                e.setX(randomMiser(0, w - enemyIcon.getWidth()));
-                e.setY(randomMiser(0, h - enemyIcon.getHeight()));
-            }
-
-            e.setInitialized(true);
-        }
-
-        invalidate(); //redraw everything - this ensures onDraw() is called.
-    }
-
     /**
      * Calculates the absolute distance between two objects
      *
@@ -250,12 +230,27 @@ public class MyView extends View {
         return rand.nextInt(max - min + 1) + min;
     }
 
-    public void setGoldCoint(ArrayList<GoldCoin> gold) {
-        goldCoins = gold;
+    public int updateTime() {
+        counter++;
+        return counter;
     }
 
-    public void setEnemies(ArrayList<Enemy> enemies) {
-        this.enemies = enemies;
+    public void nextLevel() {
+        goldCoins = new ArrayList<GoldCoin>();
+
+        for (int i = 0; i < currentLevel.getNumberOfCoins(); i++) {
+            GoldCoin g = new GoldCoin();
+            goldCoins.add(g);
+        }
+        resetLevel();
+    }
+
+    public void isOnEnemy() {
+        for (Enemy e : enemies) {
+            if (spaceBetween(pacx, pacy, e.getX(), e.getY()) < 100) {
+                gameOver = true;
+            }
+        }
     }
 
 }

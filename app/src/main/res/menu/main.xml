@@ -3,9 +3,29 @@
     tools:context="org.example.canvasdemo.MainActivity" >
 
     <item
-        android:id="@+id/action_settings"
-        android:orderInCategory="100"
+        android:id="@+id/item_help"
+        android:icon="@android:drawable/ic_menu_help"
+        android:showAsAction="always"
+        android:orderInCategory="1"
+        android:title="Help"/>
+
+    <item
+        android:id="@+id/item_refresh"
+        android:showAsAction="ifRoom"
+        android:orderInCategory="3"
+        android:title="Refresh"/>
+
+    <item
+        android:id="@+id/item_about"
+        android:icon="@android:drawable/ic_menu_info_details"
+        android:showAsAction="ifRoom"
+        android:orderInCategory="2"
+        android:title="About"/>
+
+    <item
+        android:id="@+id/item_delete"
         android:showAsAction="never"
-        android:title="@string/action_settings"/>
+        android:orderInCategory="4"
+        android:title="Delete"/>
 
 </menu>

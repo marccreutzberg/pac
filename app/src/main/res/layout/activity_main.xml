@@ -1,10 +1,9 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:orientation="vertical"
     android:layout_height="match_parent"
-    tools:context="org.example.canvasdemo.MainActivity" >
-
+    android:orientation="vertical"
+    tools:context="org.example.canvasdemo.MainActivity">
 
 
     <!-- Notice how the custom view is referenced here with
@@ -16,35 +15,35 @@ a full package path-->
         android:weightSum="100">
 
         <Button
-            android:onClick="resetGame"
             android:id="@+id/resetBtn"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_weight="33.33"
+            android:onClick="resetCompletedGame"
             android:text="Reset" />
 
         <Button
-            android:onClick="pauseGame"
             android:id="@+id/pauseGame"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_weight="33.33"
+            android:onClick="pauseGame"
             android:text="Pause" />
 
         <Button
-            android:onClick="continueGame"
             android:id="@+id/continueGame"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_weight="33.33"
+            android:onClick="continueGame"
             android:text="Continue" />
     </LinearLayout>
 
     <org.example.canvasdemo.MyView
         android:id="@+id/gameView"
-        android:layout_weight="1"
         android:layout_width="match_parent"
-        android:layout_height="match_parent">
+        android:layout_height="match_parent"
+        android:layout_weight="1">
 
     </org.example.canvasdemo.MyView>
 
@@ -57,8 +56,8 @@ a full package path-->
             android:id="@+id/moveLeft"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Left"
-            android:layout_weight="0.61" />
+            android:layout_weight="0.61"
+            android:text="Left" />
 
         <Button
             android:id="@+id/moveUp"
@@ -81,6 +80,18 @@ a full package path-->
             android:layout_weight="1"
             android:text="Right" />
     </LinearLayout>
+
+    <TextView
+        android:id="@+id/currentLevelTextView"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="" />
+
+    <TextView
+        android:id="@+id/timeTextView"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/time" />
 
     <TextView
         android:id="@+id/pointsTextView"

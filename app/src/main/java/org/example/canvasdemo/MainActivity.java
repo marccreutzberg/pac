@@ -21,6 +21,18 @@ public class MainActivity extends FragmentActivity implements GameOverDialog.Gam
     ArrayList<Enemy> enemies = new ArrayList<Enemy>();
     int point = 0;
     boolean isPaused = false;
+    private Timer myTimer;
+    private Timer countDownTimer;
+    private int countDownCounter = 0;
+    private int counter = 0;
+    private int currentLevelDuration = 0;
+    private int currentLevelIndex = 0;
+    private Move moves;
+    private Move lastMove;
+
+    enum Move {
+        UP, DOWN, LEFT, RIGHT
+    }
 
     @Override
     public void onGameOverDialogResetClick(DialogFragment dialog) {
@@ -52,20 +64,6 @@ public class MainActivity extends FragmentActivity implements GameOverDialog.Gam
         t.setText("Current level: " + myView.currentLevel.getName());
     }
 
-
-    enum Move {
-        UP, DOWN, LEFT, RIGHT
-    }
-
-    private Timer myTimer;
-    private Timer countDownTimer;
-    private int countDownCounter = 0;
-    private int counter = 0;
-    private int currentLevelDuration = 0;
-    private int currentLevelIndex = 0;
-    private Move moves;
-    private Move lastMove;
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -81,7 +79,6 @@ public class MainActivity extends FragmentActivity implements GameOverDialog.Gam
         Button resetBtn = (Button) findViewById(R.id.resetBtn);
 
         myView = (MyView) findViewById(R.id.gameView);
-        //listener of our pacman
 
         leftButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -115,7 +112,6 @@ public class MainActivity extends FragmentActivity implements GameOverDialog.Gam
                 if (!isPaused) {
                     moves = Move.DOWN;
                 }
-
             }
         });
 
@@ -186,10 +182,6 @@ public class MainActivity extends FragmentActivity implements GameOverDialog.Gam
         }
     }
 
-    //
-    //// FOR AUTO RUN
-    //
-
     @Override
     protected void onStop() {
         super.onStop();
@@ -219,7 +211,6 @@ public class MainActivity extends FragmentActivity implements GameOverDialog.Gam
 
                 myView.moveEnemy();
 
-                //enemy running the same way 10 times
                 setPointTextView();
             }
 
@@ -234,8 +225,6 @@ public class MainActivity extends FragmentActivity implements GameOverDialog.Gam
                     resetCompletedGame();
                 }
             }
-
-
         }
     };
 
@@ -259,10 +248,10 @@ public class MainActivity extends FragmentActivity implements GameOverDialog.Gam
     private ArrayList<Level> generateLevels() {
         ArrayList<Level> levels = new ArrayList<Level>();
         Level level1 = new Level(20, 5, "Level 1");
-        Level level2 = new Level(15, 8, "Level 2");
-        Level level3 = new Level(15, 10, "Level 3");
-        Level level4 = new Level(10, 10, "Level 4");
-        Level level5 = new Level(10, 15, "Level 5");
+        Level level2 = new Level(20, 8, "Level 2");
+        Level level3 = new Level(20, 10, "Level 3");
+        Level level4 = new Level(20, 10, "Level 4");
+        Level level5 = new Level(20, 15, "Level 5");
 
         levels.add(level1);
         levels.add(level2);

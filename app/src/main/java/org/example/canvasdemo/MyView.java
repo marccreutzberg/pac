@@ -106,35 +106,34 @@ public class MyView extends View {
         int movingPixels = h / 150;
         isStarted = true;
 
-            if (direction == "UP") {
-                pacIcon = BitmapFactory.decodeResource(getResources(), R.drawable.pacman_up);
-                if ((pacy + pacIcon.getHeight() + movingPixels) > (pacIcon.getHeight() + movingPixels)) {
+        if (direction.equals("UP")){
+            pacIcon = BitmapFactory.decodeResource(getResources(), R.drawable.pacman_up);
+            if ((pacy + pacIcon.getHeight() + movingPixels) > (pacIcon.getHeight() + movingPixels)) {
 
-                    pacy = pacy - movingPixels;
-                }
+                pacy = pacy - movingPixels;
             }
+        }
 
-            if (direction == "DOWN") {
-                pacIcon = BitmapFactory.decodeResource(getResources(), R.drawable.pacman_down);
-
-                if ((pacy + pacIcon.getHeight()) < h ) {
-                    pacy = pacy + movingPixels;
-                }
+        if (direction.equals("DOWN")){
+            pacIcon = BitmapFactory.decodeResource(getResources(), R.drawable.pacman_down);
+            if ((pacy + pacIcon.getHeight()) < h ) {
+                pacy = pacy + movingPixels;
             }
+        }
 
-            if (direction == "RIGHT") {
-                pacIcon = BitmapFactory.decodeResource(getResources(), R.drawable.pacman);
-                if ((pacx + pacIcon.getWidth() + movingPixels) < w ) {
-                    pacx = pacx + movingPixels;
-                }
+        if (direction.equals("RIGHT")){
+            pacIcon = BitmapFactory.decodeResource(getResources(), R.drawable.pacman);
+            if ((pacx + pacIcon.getWidth() + movingPixels) < w ) {
+                pacx = pacx + movingPixels;
             }
+        }
 
-            if (direction == "LEFT") {
-                pacIcon = BitmapFactory.decodeResource(getResources(), R.drawable.pacman_left);
-                if ((pacx + pacIcon.getWidth() + movingPixels) > (pacIcon.getWidth() + movingPixels)) {
-                    pacx = pacx - movingPixels;
-                }
+        if (direction.equals("LEFT")){
+            pacIcon = BitmapFactory.decodeResource(getResources(), R.drawable.pacman_left);
+            if ((pacx + pacIcon.getWidth() + movingPixels) > (pacIcon.getWidth() + movingPixels)) {
+                pacx = pacx - movingPixels;
             }
+        }
 
         isOnCoin();
         isOnEnemy();

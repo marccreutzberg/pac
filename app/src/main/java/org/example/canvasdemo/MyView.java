@@ -41,9 +41,6 @@ public class MyView extends View {
     int pacy = 400;
     int h, w; //used for storing our height and width
 
-    /* The next 3 constructors are needed for the Android view system,
-    when we have a custom view.
-     */
     public MyView(Context context) {
         super(context);
 
@@ -102,6 +99,11 @@ public class MyView extends View {
         super.onDraw(canvas);
     }
 
+    /**
+     * Move PacMan
+     * @param direction taking UP,DOWN,RIGHT,LEFT for moving way
+     * @return points
+     */
     public int movePac(String direction) {
         int movingPixels = ((h + w) / 2) / 150;
         isStarted = true;
@@ -109,7 +111,6 @@ public class MyView extends View {
         if (direction.equals("UP")){
             pacIcon = BitmapFactory.decodeResource(getResources(), R.drawable.pacman_up);
             if ((pacy + pacIcon.getHeight() + movingPixels) > (pacIcon.getHeight() + movingPixels)) {
-
                 pacy = pacy - movingPixels;
             }
         }
@@ -137,11 +138,14 @@ public class MyView extends View {
 
         isOnCoin();
         isOnEnemy();
-        invalidate(); //redraw everything - this ensures onDraw() is called.
+        invalidate();
 
         return points;
     }
 
+    /**
+     * Is PacMan on a Coin
+     */
     public void isOnCoin() {
         for (GoldCoin g : goldCoins) {
             if (!g.isTaken()) {
@@ -154,6 +158,9 @@ public class MyView extends View {
         }
     }
 
+    /**
+     * Reset level
+     */
     public void resetLevel() {
         pacIcon = BitmapFactory.decodeResource(getResources(), R.drawable.pacman);
         pacx = 50;
@@ -185,6 +192,9 @@ public class MyView extends View {
         invalidate(); //redraw everything - this ensures onDraw() is called.
     }
 
+    /**
+     * Move a enemyy
+     */
     public void moveEnemy() {
         int movingEnemyPixels = ((h + w) / 2) / 300;
         for (Enemy e : enemies) {
